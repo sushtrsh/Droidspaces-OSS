@@ -48,7 +48,7 @@ data class HostCapabilities(
     fun coerce(s: ContainerConfigState): ContainerConfigState {
         val mode = if (s.netMode in supportedNetModes()) s.netMode else "host"
         val hwAccess = s.enableHwAccess && has("devtmpfs")
-        val anland = s.enableAnland && (hwAccess || s.enableGpuMode)
+        val anland = s.enableAnland && s.enableGpuMode
         return s.copy(
             netMode = mode,
             enableHwAccess = hwAccess,

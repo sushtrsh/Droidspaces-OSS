@@ -144,7 +144,7 @@ fun InstallationSummaryScreen(
                     Option(config.disableIPv6, stringResource(R.string.disable_ipv6), stringResource(R.string.enabled_legend), Icons.Default.NetworkCheck)
                     Option(config.enableAndroidStorage, stringResource(R.string.android_storage), stringResource(R.string.enabled_legend), DsIcons.Logo)
                     Option(config.enableHwAccess, stringResource(R.string.hardware_access), stringResource(R.string.enabled_legend), Icons.Default.Devices)
-                    Option(!config.enableHwAccess && config.enableGpuMode, stringResource(R.string.gpu_access), stringResource(R.string.enabled_legend), Icons.Default.DeveloperBoard)
+                    Option(config.enableGpuMode, stringResource(R.string.gpu_access), stringResource(R.string.enabled_legend), Icons.Default.DeveloperBoard)
                     Option(config.enableTermuxX11, stringResource(R.string.termux_x11), stringResource(R.string.enabled_legend), painterResource(id = R.drawable.ic_x11))
                     Option(config.enableAnland, stringResource(R.string.enable_anland), stringResource(R.string.enabled_legend), Icons.Default.DesktopWindows)
                     Option(config.enableVirgl, stringResource(R.string.enable_virgl), stringResource(R.string.enabled_legend), Icons.Default.Layers)

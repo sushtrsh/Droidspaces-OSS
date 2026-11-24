@@ -106,7 +106,7 @@ fun ContainerConfigForm(
     LifecycleResumeEffect(Unit) { HostCapabilities.refreshApps(context); onPauseOrDispose {} }
     val termux = ok("termux")
     val tx11 = termux && ok("termux_x11")
-    val gpu = state.enableHwAccess || state.enableGpuMode
+    val gpu = state.enableGpuMode
 
     val isSeccompDisabled = privilegedTags(state.privileged).let { "noseccomp" in it || "full" in it }
     val usernsSupported = ok("user_ns")
