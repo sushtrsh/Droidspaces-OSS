@@ -20,6 +20,13 @@ on:
         required: false
         type: string
 
+# Cancel any in-progress run for the same branch or tag so a fast push does
+# not queue a stale build behind itself. Tag pushes and release dispatches are
+# never cancelled (each is a unique key).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' && github.event_name != 'workflow_dispatch' }}
+
 permissions:
   # Needed to create the release on a tag; a pull request token is read-only regardless
   contents: write
@@ -54,15 +61,40 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        # setup-java's built-in Gradle cache covers ~/.gradle/caches and
+        # ~/.gradle/wrapper. We add the project-level build cache on top.
         cache: gradle
 
-    # The release URL names a fixed set of toolchains, so it is the whole key
+    # The release URL names a fixed set of toolchains, so it is the whole key.
     - name: Cache Toolchains
       id: toolchains
       uses: actions/cache@v4
       with:
         path: ~/toolchains
         key: musl-toolchains-${{ env.TOOLCHAINS_URL }}
+
+    # Gradle's build cache lets incremental task outputs survive across runs.
+    # The key rolls on any change to Gradle files or the backend sources so a
+    # stale cache never hides a real build failure.
+    - name: Cache Gradle build cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/build-cache
+          Android/.gradle
+        key: gradle-build-cache-${{ runner.os }}-${{ hashFiles('Android/**/*.gradle*', 'Android/**/*.kts', 'Android/gradle/libs.versions.toml', 'src/**') }}
+        restore-keys: |
+          gradle-build-cache-${{ runner.os }}-
+
+    # The C backend is incremental by arch; cache the object files so only
+    # changed translation units are recompiled on the next run.
+    - name: Cache C object files
+      uses: actions/cache@v4
+      with:
+        path: output/.obj
+        key: c-objs-${{ runner.os }}-${{ hashFiles('src/**', 'Makefile') }}
+        restore-keys: |
+          c-objs-${{ runner.os }}-
 
     - name: Download Toolchains
       if: steps.toolchains.outputs.cache-hit != 'true'
@@ -110,7 +142,7 @@ jobs:
     - name: Build Android App with Gradle
       run: |
         cd Android
-        ./gradlew assembleRelease --no-daemon \
+        ./gradlew assembleRelease --no-daemon --build-cache \
           -PKEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}" \
           -PKEY_ALIAS="${{ secrets.KEY_ALIAS }}" \
           -PKEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
