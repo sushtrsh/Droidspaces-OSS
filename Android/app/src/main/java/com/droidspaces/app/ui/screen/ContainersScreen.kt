@@ -3,6 +3,12 @@ package com.droidspaces.app.ui.screen
 import com.droidspaces.app.ui.component.DsDialog
 import com.droidspaces.app.ui.component.ConfirmPhraseField
 import com.droidspaces.app.ui.component.DsTextFieldDefaults
+import com.droidspaces.app.ui.screen.InitSystem
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import com.droidspaces.app.util.ContainerOSInfoManager
+import com.droidspaces.app.util.ContainerUsersManager
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -87,6 +93,8 @@ fun ContainersScreen(
     onNavigateToInstallation: (Uri) -> Unit = {},
     onNavigateToEditContainer: (String) -> Unit = {},
     onNavigateToContainerDetails: (String) -> Unit = {},
+    onNavigateToTerminal: (String) -> Unit = {},
+    onNavigateToServices: (String, InitSystem) -> Unit = { _, _ -> },
     containerViewModel: ContainerViewModel,
     expandedContainerName: String?,
     onExpandedContainerNameChange: (String?) -> Unit,
@@ -95,6 +103,7 @@ fun ContainersScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val systemStatsViewModel: SystemStatsViewModel = viewModel()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val prefsManager = PreferencesManager.getInstance(context)
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -153,6 +162,14 @@ fun ContainersScreen(
     val containers = containerViewModel.containerList
     // Removed cards stay here until they finish leaving, so the empty state waits for them.
     val entries = rememberAnimatedEntries(containers) { it.name }
+
+    // Poll live OS info while containers tab is foregrounded
+    val runningContainers = remember(containers) { containers.filter { it.isRunning } }
+    LaunchedEffect(runningContainers) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            systemStatsViewModel.monitorContainers(runningContainers, onStopped = containerViewModel::refresh)
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -213,20 +230,39 @@ fun ContainersScreen(
                         }
 
                         AnimatedListEntry(entry) {
+                            val liveOsInfo = systemStatsViewModel.containerUsageMap[container.name]
+                            val osInfo = liveOsInfo ?: remember(container.name) {
+                                ContainerOSInfoManager.getCachedOSInfo(container.name, context)
+                            }
+
                             ContainerCard(
                                 container = container,
                                 isOperationRunning = isRunning,
                                 isExpanded = expandedContainerName == container.name,
+                                osInfo = osInfo,
                                 actions = ContainerCardActions(
                                 onToggleExpand = {
                                     onExpandedContainerNameChange(if (expandedContainerName == container.name) null else container.name)
                                 },
-                                 onShowLogs = {
+                                onShowLogs = {
                                     opsViewModel.showLogViewerFor = container.name
                                 },
                                 onStart = { run("start") },
                                 onStop = { run("stop") },
                                 onRestart = { run("restart") },
+                                onTerminal = {
+                                    onNavigateToTerminal(container.name)
+                                },
+                                onServices = {
+                                    val init = ContainerUsersManager.getCachedInitSystem(container.name)
+                                    val initSys = when (init?.lowercase()) {
+                                        "procd" -> InitSystem.PROCD
+                                        "openrc" -> InitSystem.OPENRC
+                                        "runit" -> InitSystem.RUNIT
+                                        else -> InitSystem.SYSTEMD
+                                    }
+                                    onNavigateToServices(container.name, initSys)
+                                },
                                 onEdit = {
                                     onExpandedContainerNameChange(null)
                                     onNavigateToEditContainer(container.name)

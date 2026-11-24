@@ -338,6 +338,18 @@ fun DroidspacesNavigation(
                 },
                 onNavigateToTerminal = { containerName ->
                     navController.navigate(Screen.Terminal.createRoute(containerName))
+                },
+                onNavigateToServices = { containerName, initSystem ->
+                    when (initSystem) {
+                        com.droidspaces.app.ui.screen.InitSystem.SYSTEMD ->
+                            navController.navigate(Screen.Systemd.createRoute(containerName))
+                        com.droidspaces.app.ui.screen.InitSystem.PROCD ->
+                            navController.navigate(Screen.Procd.createRoute(containerName))
+                        com.droidspaces.app.ui.screen.InitSystem.OPENRC ->
+                            navController.navigate(Screen.OpenRC.createRoute(containerName))
+                        com.droidspaces.app.ui.screen.InitSystem.RUNIT ->
+                            navController.navigate(Screen.Runit.createRoute(containerName))
+                    }
                 }
             )
         }

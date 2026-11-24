@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 object ContainerUsersManager {
     // In-memory cache for users (container name -> List of users)
     private val cache = mutableMapOf<String, List<String>>()
+    private val initCache = mutableMapOf<String, String>()
 
     /**
      * Get list of users from container's /etc/passwd.
@@ -65,6 +66,7 @@ object ContainerUsersManager {
         val init = out.firstOrNull()?.takeIf { it in INIT_SYSTEMS } ?: return@withContext null
         val users = out.drop(1)
         cache[containerName] = users
+        initCache[containerName] = init
         init to users
     }
 
@@ -73,8 +75,14 @@ object ContainerUsersManager {
      */
     fun getCachedUsers(containerName: String): List<String>? = cache[containerName]
 
+    /**
+     * Get cached init system without fetching (returns null if not cached).
+     */
+    fun getCachedInitSystem(containerName: String): String? = initCache[containerName]
+
     fun clearCache(containerName: String) {
         cache.remove(containerName)
+        initCache.remove(containerName)
     }
 }
 

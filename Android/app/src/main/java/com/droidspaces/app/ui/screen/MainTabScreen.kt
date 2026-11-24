@@ -76,6 +76,7 @@ fun MainTabScreen(
     onNavigateToEditContainer: (String) -> Unit = {},
     onNavigateToContainerDetails: (String) -> Unit = {},
     onNavigateToTerminal: (String) -> Unit = {},
+    onNavigateToServices: (String, InitSystem) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -301,6 +302,8 @@ fun MainTabScreen(
                                 onNavigateToInstallation = onNavigateToContainerInstallation,
                                 onNavigateToEditContainer = onNavigateToEditContainer,
                                 onNavigateToContainerDetails = onNavigateToContainerDetails,
+                                onNavigateToTerminal = onNavigateToTerminal,
+                                onNavigateToServices = onNavigateToServices,
                                 containerViewModel = containerViewModel,
                                 expandedContainerName = expandedContainerName,
                                 onExpandedContainerNameChange = { expandedContainerName = it },
