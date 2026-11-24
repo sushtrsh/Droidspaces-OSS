@@ -79,6 +79,10 @@ Each flag that configures the container is saved in its config file on `start`, 
 | `--dev-input` | `/dev/input`, `/dev/uinput` | `enable_dev_input` |
 | `--dev-usb` | `/dev/bus/usb`, `ttyUSB*`, `ttyACM*`, `hidraw*` | `enable_dev_usb` |
 | `--dev-sensors` | IIO / sensor nodes | `enable_dev_sensors` |
+| `--dev-snd` | `/dev/snd` (ALSA audio) | `enable_dev_snd` |
+| `--dev-video` | `/dev/video*`, `/dev/media*` | `enable_dev_video` |
+| `--dev-bt` | `/dev/rfkill`, `/dev/uhid` | `enable_dev_bt` |
+| `--dev-serial` | `/dev/ttyS*`, `/dev/ttyMSM*`, `/dev/ttyHS*` | `enable_dev_serial` |
 | `--dev-block` | comma separated block device paths, `/dev/sda1,/dev/sdb2` | `dev_block` |
 | `--firmware` | add the rootfs `/lib/firmware` to the kernel search path | `enable_firmware` |
 | `-X`, `--x11` | | `enable_x11` |

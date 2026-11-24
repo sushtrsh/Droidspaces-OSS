@@ -85,6 +85,10 @@ Hardware Access is all or nothing. These toggles split it, so a container gets o
 | `--dev-input` | `enable_dev_input` | `/dev/input` (bound live, so hotplug works) and `/dev/uinput`; `/sys/class/input` and the input devices behind it writable |
 | `--dev-usb` | `enable_dev_usb` | `/dev/bus/usb` (bound live), `ttyUSB*`, `ttyACM*`, `hidraw*`; `/sys/bus/usb` and the USB root hubs (so everything plugged below them) writable |
 | `--dev-sensors` | `enable_dev_sensors` | `iio:device*` and `/dev/sensors`; `/sys/bus/iio` writable. Device dependent: Android sensors usually go through the HAL over binder, not `/dev`, so the log says when nothing was found |
+| `--dev-snd` | `enable_dev_snd` | `/dev/snd` (bound live) for direct ALSA audio; `/sys/class/sound` writable |
+| `--dev-video` | `enable_dev_video` | `/dev/video*`, `/dev/media*`, `v4l-subdev*` for webcams and V4L2 capture; `/sys/class/video4linux` writable |
+| `--dev-bt` | `enable_dev_bt` | `/dev/rfkill`, `/dev/uhid`, `/dev/vhci` for Bluetooth and controllers; `/sys/class/rfkill` and `/sys/class/bluetooth` writable |
+| `--dev-serial` | `enable_dev_serial` | `/dev/ttyS*`, `/dev/ttyMSM*`, `/dev/ttyHS*` for onboard serial/UART; `/sys/class/tty` writable |
 | `--dev-block=LIST` | `dev_block` | Only the listed block devices, as comma separated `/dev/...` paths, plus `CAP_SYS_RAWIO`. `/dev/block/mmcblk1p1` appears as `/dev/mmcblk1p1`. The disk's `/sys` entry is writable |
 | `--firmware` | `enable_firmware` | Adds the rootfs `/lib/firmware` to the host kernel's firmware search path. Android kernels only, and the path is host wide while the container runs |
 

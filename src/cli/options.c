@@ -155,6 +155,10 @@ const struct option long_options[] = {
     {"dev-sensors", no_argument, 0, 287},
     {"firmware", no_argument, 0, 288},
     {"dev-block", required_argument, 0, 289},
+    {"dev-snd", no_argument, 0, 290},
+    {"dev-video", no_argument, 0, 291},
+    {"dev-bt", no_argument, 0, 292},
+    {"dev-serial", no_argument, 0, 293},
     {"virgl", no_argument, 0, 270},
     {"virgl-flags", required_argument, 0, 272},
     {"pulse-audio", no_argument, 0, 273},
@@ -443,6 +447,18 @@ int ds_apply_cli_overrides(int argc, char **argv, struct ds_config *cfg,
         return -1;
       }
       safe_strncpy(cfg->dev_block, optarg, sizeof(cfg->dev_block));
+      break;
+    case 290:
+      cfg->dev_snd = 1;
+      break;
+    case 291:
+      cfg->dev_video = 1;
+      break;
+    case 292:
+      cfg->dev_bt = 1;
+      break;
+    case 293:
+      cfg->dev_serial = 1;
       break;
     case 265:
       /* --json: JSON output */

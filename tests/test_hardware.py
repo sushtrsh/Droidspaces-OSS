@@ -57,14 +57,19 @@ class HardwareAccess(DsTest):
 
     def test_toggles_keep_the_private_dev(self):
         # Features.md "Selective hardware access": the toggles work on the isolated tmpfs /dev
-        c = self.container("sel", "--dev-input", "--dev-usb", "--dev-sensors", "--firmware")
+        c = self.container("sel", "--dev-input", "--dev-usb", "--dev-sensors",
+                           "--dev-snd", "--dev-video", "--dev-bt", "--dev-serial", "--firmware")
         self.assertEqual(c.fstype("/dev"), "tmpfs")
         self.assertNotEqual(dev_major(c, "/dev/tty1"), 4, "host VT must not be reachable")
         d = c.info()
         self.assertEqual(d["hw_access"], "none")
-        self.assertEqual((d["dev_input"], d["dev_usb"], d["dev_sensors"], d["firmware"]), (1, 1, 1, 1))
+        self.assertEqual((d["dev_input"], d["dev_usb"], d["dev_sensors"],
+                          d["dev_snd"], d["dev_video"], d["dev_bt"], d["dev_serial"], d["firmware"]),
+                         (1, 1, 1, 1, 1, 1, 1, 1))
         saved = c.saved_config()
-        for key in ("enable_dev_input", "enable_dev_usb", "enable_dev_sensors", "enable_firmware"):
+        for key in ("enable_dev_input", "enable_dev_usb", "enable_dev_sensors",
+                    "enable_dev_snd", "enable_dev_video", "enable_dev_bt", "enable_dev_serial",
+                    "enable_firmware"):
             self.assertEqual(saved[key], "1", key)
         # None of these hands back a capability
         self.assertEqual(int(c.sh("grep ^CapBnd /proc/self/status | cut -f2"), 16) >> 17 & 1, 0, "CAP_SYS_RAWIO")

@@ -158,6 +158,10 @@ int show_info(struct ds_config *cfg, int trust_cfg_pid) {
     ds_json_int("dev_input", cfg->dev_input, &first);
     ds_json_int("dev_usb", cfg->dev_usb, &first);
     ds_json_int("dev_sensors", cfg->dev_sensors, &first);
+    ds_json_int("dev_snd", cfg->dev_snd, &first);
+    ds_json_int("dev_video", cfg->dev_video, &first);
+    ds_json_int("dev_bt", cfg->dev_bt, &first);
+    ds_json_int("dev_serial", cfg->dev_serial, &first);
     ds_json_int("firmware", cfg->hw_firmware, &first);
     ds_json_str("dev_block", cfg->dev_block, &first);
 
@@ -336,6 +340,22 @@ int show_info(struct ds_config *cfg, int trust_cfg_pid) {
       }
       if (cfg->dev_sensors) {
         printf("  HW sensors: iio / sensor nodes\n");
+        feat_count++;
+      }
+      if (cfg->dev_snd) {
+        printf("  HW audio: /dev/snd\n");
+        feat_count++;
+      }
+      if (cfg->dev_video) {
+        printf("  HW video: /dev/video*, /dev/media*, v4l\n");
+        feat_count++;
+      }
+      if (cfg->dev_bt) {
+        printf("  HW bluetooth: /dev/rfkill, /dev/uhid, /dev/vhci\n");
+        feat_count++;
+      }
+      if (cfg->dev_serial) {
+        printf("  HW serial: /dev/ttyS*, /dev/ttyMSM*, /dev/ttyHS*\n");
         feat_count++;
       }
       if (cfg->dev_block[0]) {

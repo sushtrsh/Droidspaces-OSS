@@ -143,6 +143,14 @@ int ds_config_load_file(FILE *f, struct ds_config *cfg) {
       cfg->dev_usb = parse_bool(val);
     } else if (strcmp(key, "enable_dev_sensors") == 0) {
       cfg->dev_sensors = parse_bool(val);
+    } else if (strcmp(key, "enable_dev_snd") == 0) {
+      cfg->dev_snd = parse_bool(val);
+    } else if (strcmp(key, "enable_dev_video") == 0) {
+      cfg->dev_video = parse_bool(val);
+    } else if (strcmp(key, "enable_dev_bt") == 0) {
+      cfg->dev_bt = parse_bool(val);
+    } else if (strcmp(key, "enable_dev_serial") == 0) {
+      cfg->dev_serial = parse_bool(val);
     } else if (strcmp(key, "enable_firmware") == 0) {
       cfg->hw_firmware = parse_bool(val);
     } else if (strcmp(key, "dev_block") == 0) {

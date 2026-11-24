@@ -1,25 +1,6 @@
 /*
- * Droidspaces v7 - Per-feature hardware toggles
- *
- * --hw-access is all or nothing.  These toggles split it into the pieces a
- * container usually needs, each one carrying its own /dev nodes and its own
- * /sys write access, so nothing else opens up with it:
- *
- *   --dev-input      /dev/input and /dev/uinput
- *   --dev-usb        /dev/bus/usb, ttyUSB, ttyACM, hidraw
- *   --dev-sensors    IIO / sensor nodes
- *   --dev-block=LIST only the listed block devices (+ CAP_SYS_RAWIO)
- *   --firmware       host firmware search path (see start.c)
- *
- * Every toggle works on top of the isolated tmpfs /dev, like --gpu.  They do
- * nothing when --hw-access is on, which already exposes everything.
- *
- * /sys is visible read-only in every mode.  A toggle only adds RW where the
- * hardware has to be written to (authorize, power, brightness...).  sysfs
- * entries are symlinks into /sys/devices, so a class directory alone is not
- * enough: the real device directory behind each link is pinned RW as well.
- * A pin only covers what exists at boot (plus anything that appears below a
- * pinned directory, such as devices behind a USB root hub).
+ * Selective hardware access: map specific /dev nodes into the container's
+ * isolated tmpfs /dev and pin their /sys entries RW before /sys remounts RO.
  *
  * Copyright (C) 2026 ravindu644 <droidcasts@protonmail.com>
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -43,21 +24,19 @@
 #define HW_NODE_GID DS_GPU_UNIFIED_GID
 
 int ds_hw_toggles_active(const struct ds_config *cfg) {
-  return !cfg->hw_access && (cfg->dev_input || cfg->dev_usb ||
-                             cfg->dev_sensors || cfg->dev_block[0]);
+  return !cfg->hw_access &&
+         (cfg->dev_input || cfg->dev_usb || cfg->dev_sensors || cfg->dev_snd ||
+          cfg->dev_video || cfg->dev_bt || cfg->dev_serial ||
+          cfg->dev_block[0]);
 }
 
 int ds_hw_any_toggle(const struct ds_config *cfg) {
-  return cfg->dev_input || cfg->dev_usb || cfg->dev_sensors ||
+  return cfg->dev_input || cfg->dev_usb || cfg->dev_sensors || cfg->dev_snd ||
+         cfg->dev_video || cfg->dev_bt || cfg->dev_serial ||
          cfg->dev_block[0] || cfg->hw_firmware;
 }
 
-/*
- * ds_dev_block_validate()
- *
- * A --dev-block list is comma separated absolute paths under /dev.  Anything
- * else is refused up front, since each entry becomes a raw disk node.
- */
+/* Validate comma-separated absolute /dev paths for --dev-block. */
 int ds_dev_block_validate(const char *list) {
   if (!list || !list[0])
     return 0; /* empty clears the list */
@@ -82,10 +61,6 @@ int ds_dev_block_validate(const char *list) {
   }
   return 0;
 }
-
-/* ---------------------------------------------------------------------- */
-/* /dev                                                                   */
-/* ---------------------------------------------------------------------- */
 
 static void hw_make_parent(const char *tgt) {
   char parent[PATH_MAX];
@@ -176,14 +151,7 @@ static int hw_mirror_tree(const char *tag, const char *host_dir,
   return count;
 }
 
-/*
- * hw_expose_dir()
- *
- * Bind the host directory over the same path in the container /dev, so a
- * device plugged in later shows up too.  Nodes keep the host's owner and mode
- * (a chown here would change the host's own nodes).  Falls back to a one-shot
- * mknod copy when the host mount is nodev or the bind fails.
- */
+/* Bind host_dir into dev_dir for hotplug, falling back to mknod if nodev. */
 static int hw_expose_dir(const char *tag, const char *host_dir,
                          const char *dev_dir) {
   struct stat st;
@@ -237,6 +205,28 @@ static void setup_dev_sensors(const char *dev_dir) {
            "usually go through the HAL over binder, not /dev.");
 }
 
+static void setup_dev_snd(const char *dev_dir) {
+  hw_expose_dir("SND", "/dev/snd", dev_dir);
+}
+
+static void setup_dev_video(const char *dev_dir) {
+  static const char *const prefixes[] = {"video", "media", "v4l-subdev", NULL};
+  for (int i = 0; prefixes[i]; i++)
+    hw_mirror_tree("VIDEO", "/dev", prefixes[i], dev_dir, HW_MAX_DEPTH);
+}
+
+static void setup_dev_bt(const char *dev_dir) {
+  hw_mirror_chr("BT", "/dev/rfkill", dev_dir);
+  hw_mirror_chr("BT", "/dev/uhid", dev_dir);
+  hw_mirror_chr("BT", "/dev/vhci", dev_dir);
+}
+
+static void setup_dev_serial(const char *dev_dir) {
+  static const char *const prefixes[] = {"ttyS", "ttyMSM", "ttyHS", NULL};
+  for (int i = 0; prefixes[i]; i++)
+    hw_mirror_tree("SERIAL", "/dev", prefixes[i], dev_dir, HW_MAX_DEPTH);
+}
+
 static void setup_dev_block(const char *dev_dir, const char *list) {
   const char *p = list;
   while (*p) {
@@ -262,13 +252,7 @@ static void setup_dev_block(const char *dev_dir, const char *list) {
   }
 }
 
-/*
- * ds_hw_toggles_setup_dev()
- *
- * Called from boot/init.c right after setup_dev(), before pivot_root, while
- * the host's /dev is still reachable.  dev_dir is the container's isolated
- * tmpfs /dev.
- */
+/* Populate isolated /dev with requested hardware nodes before pivot_root. */
 void ds_hw_toggles_setup_dev(const char *dev_dir, const struct ds_config *cfg) {
   if (!ds_hw_toggles_active(cfg))
     return;
@@ -279,13 +263,17 @@ void ds_hw_toggles_setup_dev(const char *dev_dir, const struct ds_config *cfg) {
     setup_dev_usb(dev_dir);
   if (cfg->dev_sensors)
     setup_dev_sensors(dev_dir);
+  if (cfg->dev_snd)
+    setup_dev_snd(dev_dir);
+  if (cfg->dev_video)
+    setup_dev_video(dev_dir);
+  if (cfg->dev_bt)
+    setup_dev_bt(dev_dir);
+  if (cfg->dev_serial)
+    setup_dev_serial(dev_dir);
   if (cfg->dev_block[0])
     setup_dev_block(dev_dir, cfg->dev_block);
 }
-
-/* ---------------------------------------------------------------------- */
-/* /sys                                                                   */
-/* ---------------------------------------------------------------------- */
 
 static char g_sysroot[PATH_MAX];
 static char g_pinned[HW_MAX_PINS][PATH_MAX];
@@ -382,13 +370,7 @@ static void sys_pin_block(const char *list) {
   }
 }
 
-/*
- * ds_hw_toggles_setup_sys()
- *
- * Called from boot/init.c while the container's sysfs is still writable and
- * before it is remounted read-only.  Pins survive that remount, the same way
- * the net pin in init.c does.  Relative paths: cwd is the new rootfs.
- */
+/* Pin selective hardware sysfs paths as RW before remounting /sys read-only. */
 void ds_hw_toggles_setup_sys(const struct ds_config *cfg) {
   if (!ds_hw_toggles_active(cfg))
     return;
@@ -408,6 +390,23 @@ void ds_hw_toggles_setup_sys(const struct ds_config *cfg) {
   if (cfg->dev_sensors) {
     sys_pin_rel("SENSORS", "bus/iio");
     sys_pin_targets("SENSORS", "bus/iio/devices", NULL);
+  }
+  if (cfg->dev_snd) {
+    sys_pin_rel("SND", "class/sound");
+    sys_pin_targets("SND", "class/sound", NULL);
+  }
+  if (cfg->dev_video) {
+    sys_pin_rel("VIDEO", "class/video4linux");
+    sys_pin_targets("VIDEO", "class/video4linux", NULL);
+  }
+  if (cfg->dev_bt) {
+    sys_pin_rel("BT", "class/rfkill");
+    sys_pin_targets("BT", "class/rfkill", NULL);
+    sys_pin_rel("BT", "class/bluetooth");
+    sys_pin_targets("BT", "class/bluetooth", NULL);
+  }
+  if (cfg->dev_serial) {
+    sys_pin_rel("SERIAL", "class/tty");
   }
   if (cfg->dev_block[0])
     sys_pin_block(cfg->dev_block);

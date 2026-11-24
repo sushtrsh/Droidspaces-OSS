@@ -36,6 +36,10 @@ data class ContainerInfo(
     val enableDevInput: Boolean = false,
     val enableDevUsb: Boolean = false,
     val enableDevSensors: Boolean = false,
+    val enableDevSnd: Boolean = false,
+    val enableDevVideo: Boolean = false,
+    val enableDevBt: Boolean = false,
+    val enableDevSerial: Boolean = false,
     val enableFirmware: Boolean = false,
     val devBlock: String = "",
     val enableTermuxX11: Boolean = false,
@@ -94,6 +98,10 @@ data class ContainerInfo(
         appendLine("enable_dev_input=${if (enableDevInput) "1" else "0"}")
         appendLine("enable_dev_usb=${if (enableDevUsb) "1" else "0"}")
         appendLine("enable_dev_sensors=${if (enableDevSensors) "1" else "0"}")
+        appendLine("enable_dev_snd=${if (enableDevSnd) "1" else "0"}")
+        appendLine("enable_dev_video=${if (enableDevVideo) "1" else "0"}")
+        appendLine("enable_dev_bt=${if (enableDevBt) "1" else "0"}")
+        appendLine("enable_dev_serial=${if (enableDevSerial) "1" else "0"}")
         appendLine("enable_firmware=${if (enableFirmware) "1" else "0"}")
         if (devBlock.isNotBlank()) appendLine("dev_block=$devBlock")
         appendLine("enable_x11=${if (enableTermuxX11) "1" else "0"}")
@@ -392,6 +400,10 @@ object ContainerManager {
                 enableDevInput = configMap["enable_dev_input"] == "1",
                 enableDevUsb = configMap["enable_dev_usb"] == "1",
                 enableDevSensors = configMap["enable_dev_sensors"] == "1",
+                enableDevSnd = configMap["enable_dev_snd"] == "1",
+                enableDevVideo = configMap["enable_dev_video"] == "1",
+                enableDevBt = configMap["enable_dev_bt"] == "1",
+                enableDevSerial = configMap["enable_dev_serial"] == "1",
                 enableFirmware = configMap["enable_firmware"] == "1",
                 devBlock = configMap["dev_block"] ?: "",
                 enableTermuxX11 = (configMap["enable_x11"] ?: configMap["enable_termux_x11"]) == "1",

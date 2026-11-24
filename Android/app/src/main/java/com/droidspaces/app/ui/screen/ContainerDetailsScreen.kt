@@ -250,15 +250,22 @@ fun ContainerDetailsScreen(
                 )
             }
 
-            osInfo?.anlandSocket?.let { socketPath ->
+            if (container.enableAnland || osInfo?.anlandSocket != null) {
                 item(key = "anland_${container.name}") {
                     DisplayAppCard(
                         icon = rememberVectorPainter(Icons.Default.DesktopWindows),
                         title = context.getString(R.string.anland_option),
                         description = context.getString(R.string.enable_anland_description),
+                        actionLabel = context.getString(R.string.run),
+                        actionIcon = Icons.Default.PlayArrow,
                         onLaunch = {
-                            if (!AnlandUtils.launchWindow(context, container.name, socketPath))
-                                scope.showError(snackbarHostState, context.getString(R.string.anland_not_installed))
+                            val socketPath = osInfo?.anlandSocket ?: AnlandUtils.findSocketPath(container.name)
+                            if (socketPath != null) {
+                                if (!AnlandUtils.launchWindow(context, container.name, socketPath))
+                                    scope.showError(snackbarHostState, context.getString(R.string.anland_not_installed))
+                            } else {
+                                scope.showError(snackbarHostState, context.getString(R.string.anland_socket_not_ready))
+                            }
                         }
                     )
                 }
@@ -270,6 +277,8 @@ fun ContainerDetailsScreen(
                         icon = painterResource(R.drawable.ic_x11),
                         title = context.getString(R.string.termux_x11_option),
                         description = context.getString(R.string.launch_x11_description),
+                        actionLabel = context.getString(R.string.launch_anland_window),
+                        actionIcon = Icons.Default.ChevronRight,
                         onLaunch = {
                             if (!TermuxX11Utils.launch(context))
                                 scope.showError(snackbarHostState, context.getString(R.string.termux_x11_not_installed))
@@ -489,10 +498,16 @@ private fun PremiumInitSystemCard(state: InitSystemCardState, onNavigateToServic
 }
 
 @Composable
-private fun DisplayAppCard(icon: Painter, title: String, description: String, onLaunch: () -> Unit) {
-    val context = LocalContext.current
+private fun DisplayAppCard(
+    icon: Painter,
+    title: String,
+    description: String,
+    actionLabel: String = LocalContext.current.getString(R.string.run),
+    actionIcon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Default.PlayArrow,
+    onLaunch: () -> Unit
+) {
     DetailCard(icon = icon, title = title, description = description, action = {
-        CardButton(context.getString(R.string.launch_anland_window), onClick = onLaunch)
+        CardButton(actionLabel, actionIcon, onClick = onLaunch)
     })
 }
 

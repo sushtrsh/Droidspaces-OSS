@@ -14,6 +14,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.AutoDelete
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Cable
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Cyclone
 import androidx.compose.material.icons.filled.DesktopWindows
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.GppMaybe
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.SwapVert
@@ -30,10 +33,13 @@ import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -100,7 +106,6 @@ fun ContainerConfigForm(
     LifecycleResumeEffect(Unit) { HostCapabilities.refreshApps(context); onPauseOrDispose {} }
     val termux = ok("termux")
     val tx11 = termux && ok("termux_x11")
-    val anland = ok("anland")
     val gpu = state.enableHwAccess || state.enableGpuMode
 
     val isSeccompDisabled = privilegedTags(state.privileged).let { "noseccomp" in it || "full" in it }
@@ -186,67 +191,6 @@ fun ContainerConfigForm(
         )
         GroupDivider()
         SwitchItem(
-            icon = Icons.Default.Devices,
-            title = context.getString(R.string.hardware_access),
-            summary = if (ok("devtmpfs")) context.getString(R.string.hardware_access_description)
-                else context.getString(R.string.hardware_access_not_supported),
-            checked = state.enableHwAccess,
-            enabled = ok("devtmpfs"),
-            onCheckedChange = { on ->
-                clearFocus()
-                if (on) showHwAccessDialog = true else onStateChange(state.copy(enableHwAccess = false))
-            }
-        )
-        GroupDivider()
-        SwitchItem(
-            icon = Icons.Default.DeveloperBoard,
-            title = context.getString(R.string.gpu_access),
-            summary = context.getString(R.string.gpu_access_description),
-            // Hardware access already passes the GPU through.
-            checked = state.enableHwAccess || state.enableGpuMode,
-            enabled = !state.enableHwAccess,
-            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableGpuMode = it)) }
-        )
-        GroupDivider()
-        // Selective hardware: each one brings only the /dev nodes and /sys write
-        // access it needs. Full Hardware Access already covers all of them.
-        SwitchItem(
-            icon = Icons.Default.Devices,
-            title = context.getString(R.string.dev_input_access),
-            summary = context.getString(R.string.dev_input_access_description),
-            checked = state.enableHwAccess || state.enableDevInput,
-            enabled = !state.enableHwAccess,
-            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevInput = it)) }
-        )
-        GroupDivider()
-        SwitchItem(
-            icon = Icons.Default.Devices,
-            title = context.getString(R.string.dev_usb_access),
-            summary = context.getString(R.string.dev_usb_access_description),
-            checked = state.enableHwAccess || state.enableDevUsb,
-            enabled = !state.enableHwAccess,
-            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevUsb = it)) }
-        )
-        GroupDivider()
-        SwitchItem(
-            icon = Icons.Default.Devices,
-            title = context.getString(R.string.dev_sensors_access),
-            summary = context.getString(R.string.dev_sensors_access_description),
-            checked = state.enableHwAccess || state.enableDevSensors,
-            enabled = !state.enableHwAccess,
-            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevSensors = it)) }
-        )
-        GroupDivider()
-        SwitchItem(
-            icon = Icons.Default.Devices,
-            title = context.getString(R.string.firmware_access),
-            summary = context.getString(R.string.firmware_access_description),
-            checked = state.enableHwAccess || state.enableFirmware,
-            enabled = !state.enableHwAccess,
-            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableFirmware = it)) }
-        )
-        GroupDivider()
-        SwitchItem(
             painter = painterResource(R.drawable.ic_x11),
             title = context.getString(R.string.termux_x11),
             summary = when {
@@ -263,16 +207,124 @@ fun ContainerConfigForm(
             icon = Icons.Default.DesktopWindows,
             title = context.getString(R.string.enable_anland),
             summary = when {
-                !anland -> context.getString(R.string.anland_not_installed)
                 !gpu -> context.getString(R.string.anland_needs_gpu)
                 state.enableTermuxX11 -> context.getString(R.string.x11_replaces_anland)
                 else -> context.getString(R.string.enable_anland_description)
             },
             checked = state.enableAnland,
-            enabled = anland && gpu && !state.enableTermuxX11,
+            enabled = gpu && !state.enableTermuxX11,
             // The two display paths set conflicting services and variables.
             onCheckedChange = { clearFocus(); onStateChange(state.copy(enableAnland = it, enableTermuxX11 = state.enableTermuxX11 && !it)) }
         )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Layers,
+            title = context.getString(R.string.enable_virgl),
+            summary = if (termux) context.getString(R.string.enable_virgl_description)
+                else context.getString(R.string.termux_not_installed),
+            checked = state.enableVirgl,
+            enabled = termux,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableVirgl = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.AutoMirrored.Filled.VolumeUp,
+            title = context.getString(R.string.enable_pulseaudio),
+            summary = if (termux) context.getString(R.string.enable_pulseaudio_description)
+                else context.getString(R.string.termux_not_installed),
+            checked = state.enablePulseaudio,
+            enabled = termux,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enablePulseaudio = it)) }
+        )
+    }
+
+    GroupHeader(context.getString(R.string.cat_hardware))
+    SettingsGroup {
+        SwitchItem(
+            icon = Icons.Default.DeveloperBoard,
+            title = context.getString(R.string.gpu_access),
+            summary = context.getString(R.string.gpu_access_description),
+            checked = state.enableGpuMode,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableGpuMode = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Usb,
+            title = context.getString(R.string.dev_usb_access),
+            summary = context.getString(R.string.dev_usb_access_description),
+            checked = state.enableDevUsb,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevUsb = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Keyboard,
+            title = context.getString(R.string.dev_input_access),
+            summary = context.getString(R.string.dev_input_access_description),
+            checked = state.enableDevInput,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevInput = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.AutoMirrored.Filled.VolumeUp,
+            title = context.getString(R.string.dev_snd_access),
+            summary = context.getString(R.string.dev_snd_access_description),
+            checked = state.enableDevSnd,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevSnd = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Videocam,
+            title = context.getString(R.string.dev_video_access),
+            summary = context.getString(R.string.dev_video_access_description),
+            checked = state.enableDevVideo,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevVideo = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Bluetooth,
+            title = context.getString(R.string.dev_bt_access),
+            summary = context.getString(R.string.dev_bt_access_description),
+            checked = state.enableDevBt,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevBt = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Sensors,
+            title = context.getString(R.string.dev_sensors_access),
+            summary = context.getString(R.string.dev_sensors_access_description),
+            checked = state.enableDevSensors,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevSensors = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Cable,
+            title = context.getString(R.string.dev_serial_access),
+            summary = context.getString(R.string.dev_serial_access_description),
+            checked = state.enableDevSerial,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableDevSerial = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Memory,
+            title = context.getString(R.string.firmware_access),
+            summary = context.getString(R.string.firmware_access_description),
+            checked = state.enableFirmware,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(enableFirmware = it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.Devices,
+            title = context.getString(R.string.hardware_access),
+            summary = if (ok("devtmpfs")) context.getString(R.string.hardware_access_description)
+                else context.getString(R.string.hardware_access_not_supported),
+            checked = state.enableHwAccess,
+            enabled = ok("devtmpfs"),
+            onCheckedChange = { on ->
+                clearFocus()
+                if (on) showHwAccessDialog = true else onStateChange(state.copy(enableHwAccess = false))
+            }
+        )
+    }
         GroupDivider()
         SwitchItem(
             icon = Icons.Default.Layers,

@@ -161,6 +161,7 @@
     <string name="options_label">Options: %1$s</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="cat_hardware">Hardware &amp; Devices</string>
     <string name="restart">Restart</string>
     <string name="ipv6_option">Disable IPv6</string>
     <string name="storage_option">Storage</string>
@@ -169,6 +170,10 @@
     <string name="dev_input_option">Input</string>
     <string name="dev_usb_option">USB</string>
     <string name="dev_sensors_option">Sensors</string>
+    <string name="dev_snd_option">Audio</string>
+    <string name="dev_video_option">Camera</string>
+    <string name="dev_bt_option">Bluetooth</string>
+    <string name="dev_serial_option">Serial</string>
     <string name="dev_block_option">Disk</string>
     <string name="firmware_option">Firmware</string>
     <string name="x11_option">X11</string>
@@ -228,6 +233,14 @@
     <string name="dev_usb_access_description">Expose USB, serial adapters and hidraw only</string>
     <string name="dev_sensors_access">Sensors</string>
     <string name="dev_sensors_access_description">Expose IIO / sensor nodes only (device dependent)</string>
+    <string name="dev_snd_access">Audio Hardware</string>
+    <string name="dev_snd_access_description">Expose /dev/snd ALSA sound card nodes</string>
+    <string name="dev_video_access">Camera &amp; Video</string>
+    <string name="dev_video_access_description">Expose /dev/video*, /dev/media* V4L2 devices</string>
+    <string name="dev_bt_access">Bluetooth &amp; UHID</string>
+    <string name="dev_bt_access_description">Expose /dev/rfkill, /dev/uhid for controllers and Bluetooth</string>
+    <string name="dev_serial_access">Serial &amp; UART</string>
+    <string name="dev_serial_access_description">Expose onboard /dev/ttyS*, /dev/ttyMSM*, /dev/ttyHS*</string>
     <string name="firmware_access">Firmware Path</string>
     <string name="firmware_access_description">Add the rootfs /lib/firmware to the kernel search path</string>
     <string name="dev_block_label">Block devices</string>
@@ -256,6 +269,8 @@
     <string name="enable_anland_description">Show a Wayland desktop in the Anland app</string>
     <string name="launch_x11_description">Show the X11 desktop in the Termux:X11 app</string>
     <string name="launch_anland_window">Launch</string>
+    <string name="run">Run</string>
+    <string name="anland_socket_not_ready">Display daemon socket is not ready yet</string>
     <string name="anland_not_installed">Not available. Needs the Anland 5.x app installed. Anland 6.x is not supported.</string>
     <string name="anland_needs_gpu">Needs GPU Access or Hardware Access.</string>
     <string name="anland_replaces_x11">Off while Anland Display is on. A container uses one display path.</string>

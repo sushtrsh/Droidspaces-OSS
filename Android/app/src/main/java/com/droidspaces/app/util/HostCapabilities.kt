@@ -48,8 +48,7 @@ data class HostCapabilities(
     fun coerce(s: ContainerConfigState): ContainerConfigState {
         val mode = if (s.netMode in supportedNetModes()) s.netMode else "host"
         val hwAccess = s.enableHwAccess && has("devtmpfs")
-        // Anland needs the GPU nodes and takes the display path Termux:X11 would use.
-        val anland = s.enableAnland && has("anland") && (hwAccess || s.enableGpuMode)
+        val anland = s.enableAnland && (hwAccess || s.enableGpuMode)
         return s.copy(
             netMode = mode,
             enableHwAccess = hwAccess,

@@ -97,6 +97,10 @@ struct ds_config {
   int dev_input;        /* --dev-input: /dev/input and /dev/uinput */
   int dev_usb;          /* --dev-usb: /dev/bus/usb, ttyUSB, ttyACM, hidraw */
   int dev_sensors;      /* --dev-sensors: IIO / sensor nodes */
+  int dev_snd;          /* --dev-snd: /dev/snd (ALSA sound) */
+  int dev_video;        /* --dev-video: /dev/video*, /dev/media*, v4l */
+  int dev_bt;           /* --dev-bt: /dev/rfkill, /dev/uhid, /dev/vhci */
+  int dev_serial;       /* --dev-serial: /dev/ttyS*, /dev/ttyMSM*, /dev/ttyHS* */
   int hw_firmware;      /* --firmware: add rootfs /lib/firmware to the kernel */
   char dev_block[1024]; /* --dev-block=PATH[,PATH...]: whitelisted disks */
   int x11; /* -X, --x11: bridge host X11 socket (launches Termux:X11 on Android)

@@ -113,9 +113,9 @@ fun ControlPanelScreen(
                             val container = entry.item
                             // The heartbeat reports the broker's socket or x11 only for a container
                             // booted with that display, so it gates the pill, not the saved config.
-                            val anlandSock = containerUsageMap[container.name]?.anlandSocket
+                            val anlandSock = containerUsageMap[container.name]?.anlandSocket ?: (if (container.enableAnland) AnlandUtils.findSocketPath(container.name) else null)
                             val (displayLabel, displayIcon) = when {
-                                anlandSock != null -> context.getString(R.string.anland_option) to rememberVectorPainter(Icons.Default.DesktopWindows)
+                                anlandSock != null || container.enableAnland -> context.getString(R.string.anland_option) to rememberVectorPainter(Icons.Default.DesktopWindows)
                                 containerUsageMap[container.name]?.x11 == true -> context.getString(R.string.termux_x11_option) to painterResource(R.drawable.ic_x11)
                                 else -> null to null
                             }
@@ -133,11 +133,16 @@ fun ControlPanelScreen(
                                         displayLabel = displayLabel,
                                         displayIcon = displayIcon,
                                         onLaunchDisplay = {
-                                            if (anlandSock != null) {
-                                                if (!AnlandUtils.launchWindow(context, container.name, anlandSock))
+                                            val sock = anlandSock ?: AnlandUtils.findSocketPath(container.name)
+                                            if (sock != null) {
+                                                if (!AnlandUtils.launchWindow(context, container.name, sock))
                                                     scope.showError(snackbarHostState, context.getString(R.string.anland_not_installed))
-                                            } else if (!TermuxX11Utils.launch(context))
-                                                scope.showError(snackbarHostState, context.getString(R.string.termux_x11_not_installed))
+                                            } else if (containerUsageMap[container.name]?.x11 == true) {
+                                                if (!TermuxX11Utils.launch(context))
+                                                    scope.showError(snackbarHostState, context.getString(R.string.termux_x11_not_installed))
+                                            } else {
+                                                scope.showError(snackbarHostState, context.getString(R.string.anland_socket_not_ready))
+                                            }
                                         },
                                         osInfo = containerUsageMap[container.name],
                                     )

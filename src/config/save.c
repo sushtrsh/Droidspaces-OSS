@@ -41,6 +41,10 @@ static void ds_config_serialize_known(FILE *f, struct ds_config *cfg) {
   fprintf(f, "enable_dev_input=%d\n", cfg->dev_input);
   fprintf(f, "enable_dev_usb=%d\n", cfg->dev_usb);
   fprintf(f, "enable_dev_sensors=%d\n", cfg->dev_sensors);
+  fprintf(f, "enable_dev_snd=%d\n", cfg->dev_snd);
+  fprintf(f, "enable_dev_video=%d\n", cfg->dev_video);
+  fprintf(f, "enable_dev_bt=%d\n", cfg->dev_bt);
+  fprintf(f, "enable_dev_serial=%d\n", cfg->dev_serial);
   fprintf(f, "enable_firmware=%d\n", cfg->hw_firmware);
   if (cfg->dev_block[0])
     fprintf(f, "dev_block=%s\n", cfg->dev_block);

@@ -329,6 +329,10 @@ static void print_page(int page, const char *bin) {
     p_printf("  --dev-usb                 /dev/bus/usb, ttyUSB*, ttyACM*, "
              "hidraw*\n");
     p_printf("  --dev-sensors             IIO / sensor nodes\n");
+    p_printf("  --dev-snd                 /dev/snd/* (ALSA sound card)\n");
+    p_printf("  --dev-video               /dev/video*, /dev/media*, v4l\n");
+    p_printf("  --dev-bt                  /dev/rfkill, /dev/uhid, /dev/vhci\n");
+    p_printf("  --dev-serial              /dev/ttyS*, /dev/ttyMSM*, /dev/ttyHS*\n");
     p_printf("  --dev-block=/dev/sda1,..  Only the listed disks (keeps "
              "CAP_SYS_RAWIO)\n");
     p_printf("  --firmware                Host firmware search path\n");

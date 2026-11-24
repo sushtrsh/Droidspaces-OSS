@@ -193,6 +193,10 @@ fun ContainerCard(
                         if (container.enableDevInput) add(context.getString(R.string.dev_input_option))
                         if (container.enableDevUsb) add(context.getString(R.string.dev_usb_option))
                         if (container.enableDevSensors) add(context.getString(R.string.dev_sensors_option))
+                        if (container.enableDevSnd) add(context.getString(R.string.dev_snd_option))
+                        if (container.enableDevVideo) add(context.getString(R.string.dev_video_option))
+                        if (container.enableDevBt) add(context.getString(R.string.dev_bt_option))
+                        if (container.enableDevSerial) add(context.getString(R.string.dev_serial_option))
                         if (container.devBlock.isNotBlank()) add(context.getString(R.string.dev_block_option))
                         if (container.enableFirmware) add(context.getString(R.string.firmware_option))
                     }

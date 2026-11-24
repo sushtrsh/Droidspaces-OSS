@@ -4,6 +4,8 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import com.topjohnwu.superuser.Shell
+import java.io.File
 
 /** The Anland 5.x consumer app, which shows a container's Wayland desktop. */
 object AnlandUtils {
@@ -13,6 +15,23 @@ object AnlandUtils {
     // Matches MainActivity.EXTRA_SOCKET_PATH / EXTRA_WINDOW_NAME in the consumer app.
     private const val EXTRA_SOCKET_PATH = "socket_path"
     private const val EXTRA_WINDOW_NAME = "window_name"
+
+    /** Reads the broker socket recorded at Pids/<name>.asock. */
+    fun findSocketPath(containerName: String): String? {
+        val file = File("/data/local/Droidspaces/Pids/$containerName.asock")
+        if (file.exists()) {
+            try {
+                val sock = file.readText().trim()
+                if (sock.isNotEmpty()) return sock
+            } catch (_: Exception) {}
+        }
+        return try {
+            val out = Shell.cmd("cat /data/local/Droidspaces/Pids/${containerName}.asock").exec().out
+            out.firstOrNull()?.trim()?.ifEmpty { null }
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     /**
      * Opens the consumer's window for this container's display socket, titled with

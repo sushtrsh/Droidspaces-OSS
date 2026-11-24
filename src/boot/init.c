@@ -210,8 +210,7 @@ int internal_boot(struct ds_config *cfg) {
     goto boot_fail;
   }
 
-  /* 8b. Per-feature hardware toggles (--dev-input, --dev-usb, ...). Needs
-   * the host /dev, so before pivot_root. --hw-access already has it all. */
+  /* Selective hardware access: map requested device nodes before pivot_root. */
   if (!cfg->hw_access)
     ds_hw_toggles_setup_dev("./dev", cfg);
 
@@ -315,8 +314,7 @@ int internal_boot(struct ds_config *cfg) {
     }
   }
 
-  /* Per-feature toggles: pin just the /sys paths they need as RW, before the
-   * remount below (pins survive it, like the net pin above). */
+  /* Pin selective hardware sysfs paths as RW before remounting /sys read-only. */
   if (!cfg->hw_access)
     ds_hw_toggles_setup_sys(cfg);
 
