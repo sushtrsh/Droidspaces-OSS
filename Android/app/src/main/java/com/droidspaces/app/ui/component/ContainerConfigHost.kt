@@ -56,6 +56,7 @@ import com.droidspaces.app.util.ContainerConfigState
 import com.droidspaces.app.util.ContainerInfo
 import com.droidspaces.app.util.GatewayErrors
 import com.droidspaces.app.util.MacvlanErrors
+import com.droidspaces.app.util.withPrivileged
 
 enum class ConfigPage { Root, Network, Env, Privileged, Mounts }
 
@@ -144,7 +145,7 @@ fun ContainerConfigHost(
                 )
                 ConfigPage.Privileged -> PrivilegedModePage(
                     initial = state.privileged,
-                    onApply = { onStateChange(state.copy(privileged = it)); close() },
+                    onApply = { onStateChange(state.withPrivileged(it)); close() },
                     onClose = close
                 )
                 ConfigPage.Mounts -> BindMountsPage(

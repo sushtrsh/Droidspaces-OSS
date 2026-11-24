@@ -21,39 +21,30 @@ import com.droidspaces.app.ui.theme.JetBrainsMono
 fun privilegedTags(value: String): List<String> =
     value.split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
 
-/** The individual relaxations; "full" is all four at once. */
-private val PRIVILEGED_FLAGS = listOf("nomask", "nocaps", "noseccomp", "shared")
+val PRIVILEGED_FLAGS = listOf("nomask", "nocaps", "noseccomp", "shared")
 
-private fun flagDescription(flag: String) = when (flag) {
+fun flagDescription(flag: String) = when (flag) {
     "nomask" -> R.string.privileged_nomask_desc
     "nocaps" -> R.string.privileged_nocaps_desc
     "noseccomp" -> R.string.privileged_noseccomp_desc
     else -> R.string.privileged_shared_desc
 }
 
-/**
- * The privileged flags as a draft. Turning any on needs the confirm phrase;
- * turning them all off does not, since that only restores the defaults.
- */
 @Composable
 fun PrivilegedModePage(initial: String, onApply: (String) -> Unit, onClose: () -> Unit) {
     val context = LocalContext.current
     val initialTags = privilegedTags(initial)
     val initialOn = if ("full" in initialTags) PRIVILEGED_FLAGS else initialTags.filter { it in PRIVILEGED_FLAGS }
     var on by rememberSaveable { mutableStateOf(initialOn) }
-    var phrase by rememberSaveable { mutableStateOf("") }
 
     val full = on.size == PRIVILEGED_FLAGS.size
     val tags = if (full) "full" else PRIVILEGED_FLAGS.filter { it in on }.joinToString(",")
     val dirty = on.toSet() != initialOn.toSet()
-    // Turning flags off only restores the defaults, so only turning one on needs the phrase.
-    val enabling = (on - initialOn.toSet()).isNotEmpty()
-    val confirmed = phrase == context.getString(R.string.i_understand_caps)
 
     DraftPageScaffold(
         title = context.getString(R.string.privileged_mode),
         dirty = dirty,
-        canSave = !enabling || confirmed,
+        canSave = true,
         onSave = { onApply(tags) },
         onClose = onClose,
         confirmLabel = context.getString(R.string.done)
@@ -85,15 +76,6 @@ fun PrivilegedModePage(initial: String, onApply: (String) -> Unit, onClose: () -
                     onCheckedChange = { checked -> on = if (checked) on + flag else on - flag }
                 )
             }
-        }
-        if (enabling) {
-            ConfirmPhraseField(
-                value = phrase,
-                onValueChange = { phrase = it },
-                isError = phrase.isNotEmpty() && !confirmed,
-                colors = DsTextFieldDefaults.colors(),
-                modifier = Modifier.padding(start = screenGutter() + 4.dp, end = screenGutter() + 4.dp, top = 24.dp)
-            )
         }
     }
 }

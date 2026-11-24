@@ -318,7 +318,7 @@
     <string name="help_card_message">Tocca qui per imparare come configurare il tuo primo contenitore Linux!</string>
     <string name="help_card_url" translatable="false">https://github.com/ravindu644/Droidspaces-OSS/blob/main/Documentation/Installation-Android.md</string>
     <string name="privileged_mode">Modalità Privilegiata</string>
-    <string name="privileged_nomask_desc">Disabilita le maschere jail per consentire l\'accesso in scrittura a /proc e /sys. Nota: /sys rimane in sola lettura a meno che sia abilitato anche l\'Accesso Hardware.</string>
+    <string name="privileged_nomask_desc">Disabilita le maschere jail per consentire l\'accesso in scrittura a /proc e /sys.</string>
     <string name="privileged_nocaps_desc">Non eliminare alcuna capability Linux (piena potenza root).</string>
     <string name="privileged_noseccomp_desc">Disabilita il filtraggio syscall Seccomp. Questo abilita funzionalità avanzate del kernel come i namespace utente non privilegiati, strettamente necessari per il sandboxing annidato (Bubblewrap, Flatpak) e consente anche il caricamento di moduli kernel di terze parti.</string>
     <string name="privileged_shared_desc">Abilita la propagazione del mount MS_SHARED all\'host.</string>

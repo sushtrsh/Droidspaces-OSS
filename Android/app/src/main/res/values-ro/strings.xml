@@ -319,7 +319,7 @@
     <string name="export_container_failed">Nu s-a putut exporta container-ul %1$s</string>
     <string name="starting_export">Export-ul a pornit...</string>
     <string name="privileged_mode">Modul privilegiat</string>
-    <string name="privileged_nomask_desc">Dezactivează jail masks-urile pentru a permite scrierea către /proc și /sys. Notă: /sys rămâne read-only dacă Accesul la Hardware nu este activat.</string>
+    <string name="privileged_nomask_desc">Dezactivează jail masks-urile pentru a permite scrierea către /proc și /sys.</string>
     <string name="privileged_nocaps_desc">Nu dezactiva nicio capacitate Linux (putere completă de root).</string>
     <string name="privileged_noseccomp_desc">Dezactivează filtrarea Seccomp de syscall. Aceasta permite opțiuni de kernel avansate precum utilizarea neprivilegiată a namespace-urilor user, necesară pentru sandboxing nested (Bubblewrap, Flatpak). Dezactivarea acestei opțiuni va permite, de asemenea, încărcarea modulelor kernel out-of-tree.</string>
     <string name="privileged_shared_desc">Activează propagarea mount MS_SHARED către gazdă.</string>

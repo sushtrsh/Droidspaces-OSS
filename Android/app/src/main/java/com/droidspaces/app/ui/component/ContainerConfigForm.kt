@@ -69,6 +69,7 @@ import com.droidspaces.app.ui.theme.JetBrainsMono
 import com.droidspaces.app.ui.util.FocusUtils
 import com.droidspaces.app.ui.util.rememberClearFocus
 import com.droidspaces.app.util.ContainerConfigState
+import com.droidspaces.app.util.withPrivilegedFlag
 import com.droidspaces.app.util.ContainerInfo
 import com.droidspaces.app.util.GatewayErrors
 import com.droidspaces.app.util.HostCapabilities
@@ -108,7 +109,7 @@ fun ContainerConfigForm(
     val tx11 = termux && ok("termux_x11")
     val gpu = state.enableGpuMode
 
-    val isSeccompDisabled = privilegedTags(state.privileged).let { "noseccomp" in it || "full" in it }
+    val isSeccompDisabled = state.privilegedNoseccomp
     val usernsSupported = ok("user_ns")
 
     // One pass: drop what the kernel cannot do, then the seccomp rule, then a
@@ -526,6 +527,49 @@ fun ContainerConfigForm(
             onCheckedChange = { clearFocus(); onStateChange(state.copy(forceCgroupv1 = it)) }
         )
         GroupDivider()
+        SwitchItem(
+            icon = Icons.Default.PowerSettingsNew,
+            title = context.getString(R.string.run_at_boot),
+            summary = context.getString(R.string.run_at_boot_description),
+            checked = state.runAtBoot,
+            onCheckedChange = { clearFocus(); onStateChange(state.copy(runAtBoot = it)) }
+        )
+    }
+
+    GroupHeader(context.getString(R.string.privileged_mode))
+    SettingsGroup {
+        SwitchItem(
+            title = "nomask",
+            titleFontFamily = JetBrainsMono,
+            summary = context.getString(R.string.privileged_nomask_desc),
+            checked = state.privilegedNomask,
+            onCheckedChange = { clearFocus(); onStateChange(state.withPrivilegedFlag("nomask", it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            title = "nocaps",
+            titleFontFamily = JetBrainsMono,
+            summary = context.getString(R.string.privileged_nocaps_desc),
+            checked = state.privilegedNocaps,
+            onCheckedChange = { clearFocus(); onStateChange(state.withPrivilegedFlag("nocaps", it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            title = "noseccomp",
+            titleFontFamily = JetBrainsMono,
+            summary = context.getString(R.string.privileged_noseccomp_desc),
+            checked = state.privilegedNoseccomp,
+            onCheckedChange = { clearFocus(); onStateChange(state.withPrivilegedFlag("noseccomp", it)) }
+        )
+        GroupDivider()
+        SwitchItem(
+            title = "shared",
+            titleFontFamily = JetBrainsMono,
+            summary = context.getString(R.string.privileged_shared_desc),
+            checked = state.privilegedShared,
+            onCheckedChange = { clearFocus(); onStateChange(state.withPrivilegedFlag("shared", it)) }
+        )
+        GroupDivider()
         NavRow(
             icon = Icons.Default.GppMaybe,
             title = context.getString(R.string.privileged_mode),
@@ -533,14 +577,6 @@ fun ContainerConfigForm(
             summary = if (state.privileged.isEmpty()) context.getString(R.string.not_configured) else null,
             valueFontFamily = JetBrainsMono,
             onClick = { onOpenPage(ConfigPage.Privileged) }
-        )
-        GroupDivider()
-        SwitchItem(
-            icon = Icons.Default.PowerSettingsNew,
-            title = context.getString(R.string.run_at_boot),
-            summary = context.getString(R.string.run_at_boot_description),
-            checked = state.runAtBoot,
-            onCheckedChange = { clearFocus(); onStateChange(state.copy(runAtBoot = it)) }
         )
     }
 

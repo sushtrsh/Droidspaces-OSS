@@ -690,7 +690,7 @@
     <string name="help_card_message">Tap here to learn how to setup your first Linux container!</string>
     <string name="help_card_url">https://github.com/ravindu644/Droidspaces-OSS/blob/main/Documentation/Installation-Android.md</string>
     <string name="privileged_mode">Privileged Mode</string>
-    <string name="privileged_nomask_desc">Disable jail masks to allow write access to /proc and /sys. Note: /sys remains read-only unless Hardware Access is also enabled.</string>
+    <string name="privileged_nomask_desc">Disable jail masks to allow write access to /proc and /sys.</string>
     <string name="privileged_nocaps_desc">Do not drop any Linux capabilities (full root power).</string>
     <string name="privileged_noseccomp_desc">Disable Seccomp syscall filtering. This enables advanced kernel features like unprivileged user namespaces, strictly required for nested sandboxing (Bubblewrap, Flatpak) and also allows loading out-of-tree kernel modules.</string>
     <string name="privileged_shared_desc">Enable MS_SHARED mount propagation to the host.</string>
