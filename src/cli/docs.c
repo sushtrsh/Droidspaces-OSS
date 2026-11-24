@@ -364,8 +364,8 @@ static void print_page(int page, const char *bin) {
 
     p_printf("%sPrivileged Mode (--privileged):%s\n", bold, reset);
     p_printf("  Relax security with comma-separated tags:\n");
-    p_printf("  nomask        No /proc and /sys jail masks. /sys itself stays "
-             "read-only unless --hw-access\n");
+    p_printf("  nomask        No /proc and /sys jail masks (/proc and /sys are "
+             "writable)\n");
     p_printf("  nocaps        Keep all Linux Capabilities (full root)\n");
     p_printf("  noseccomp     Disable syscall filtering (useful for "
              "flatpak,bwrap and other unprivileged sandboxes)\n");

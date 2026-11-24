@@ -135,7 +135,7 @@ keywords: droidspaces, settings, features, network, mode, hardware, access, gpu,
 
 `--privileged=TAG[,TAG...]`，键 `privileged`。逐个移除安全防线：
 
-- `nomask`：不遮蔽 `/proc` 和 `/sys`。除非打开硬件访问，`/sys` 仍为只读。
+- `nomask`：不遮蔽 `/proc` 和 `/sys`，允许对两者的写访问。
 - `nocaps`：不丢弃任何 capabilities；容器内的 root 是完整的 root。
 - `noseccomp`：不做系统调用过滤。
 - `shared`：容器内的挂载会传播到宿主机。

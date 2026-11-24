@@ -318,11 +318,10 @@ int internal_boot(struct ds_config *cfg) {
   if (!cfg->hw_access)
     ds_hw_toggles_setup_sys(cfg);
 
-  /* Remount /sys as RO for systemd's benefit, but ONLY if we are in
-   * foreground mode + systemd (where we used pinned sub-mounts) or if
-   * hw_access is disabled entirely. In background mode or non-systemd
-   * hw_access mode, we leave /sys RW. */
-  if (!cfg->hw_access || (cfg->foreground && is_systemd)) {
+  /* Remount /sys read-only unless hw_access or nomask keeps it writable,
+   * or foreground systemd needs it locked down. */
+  int sys_ro = !cfg->hw_access && !(cfg->privileged_mask & DS_PRIV_NOMASK);
+  if (sys_ro || (cfg->foreground && is_systemd)) {
     if (mount(NULL, "sys", NULL, MS_REMOUNT | MS_BIND | MS_RDONLY, NULL) < 0) {
       ds_warn("Failed to remount /sys as read-only: %s", strerror(errno));
     }

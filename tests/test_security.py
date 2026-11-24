@@ -57,6 +57,10 @@ class DefaultPosture(DsTest):
     def test_mounts_are_private(self):
         self.assertNotIn("shared:", self.c.mountinfo())
 
+    def test_sys_is_readonly(self):
+        sys_opts = self.c.sh("awk '$5==\"/sys\"{print $6; exit}' /proc/self/mountinfo").split(",")
+        self.assertIn("ro", sys_opts)
+
     def test_no_pristine_proc_without_sandboxing(self):
         names = set(self.c.sh("ls /run/droidspaces").split())
         self.assertIn("container.config", names)
@@ -79,6 +83,8 @@ class Privileged(DsTest):
         d = caps(c)
         self.assertEqual((d["CapBnd"], d["Seccomp"]), (cap_mask(CAPS_DROPPED_NO_HW), "2"))
         self.assertEqual(c.info()["privileged_mode"], "nomask")
+        sys_opts = c.sh("awk '$5==\"/sys\"{print $6; exit}' /proc/self/mountinfo").split(",")
+        self.assertIn("rw", sys_opts)
 
     def test_nocaps(self):
         c = self.container("nocaps", "--privileged=nocaps")

@@ -153,7 +153,7 @@ The cost is that root in the container can reach the host's live sysctl tree thr
 
 `--privileged=TAG[,TAG...]`, key `privileged`. Removes security barriers one at a time:
 
-- `nomask`: `/proc` and `/sys` are not masked. `/sys` stays read-only unless Hardware Access is on.
+- `nomask`: `/proc` and `/sys` are not masked, leaving both writable.
 - `nocaps`: no capabilities are dropped; root in the container is full root.
 - `noseccomp`: no system call filtering.
 - `shared`: mounts made in the container propagate to the host.
