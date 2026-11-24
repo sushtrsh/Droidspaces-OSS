@@ -324,7 +324,6 @@ fun ContainerConfigForm(
                 if (on) showHwAccessDialog = true else onStateChange(state.copy(enableHwAccess = false))
             }
         )
-    }
         GroupDivider()
         SwitchItem(
             icon = Icons.Default.Layers,
